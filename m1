@@ -2,31 +2,31 @@ Params
 	Numeric I(2); 
 Vars 
 	Numeric diff(0);
-		Numeric lastdiff(0);
+	Numeric lastdiff(0);
 
 Begin
 	diff=High-Low;
 	if(Close>Open and Close[1]>Open[1])
-    {
+	{
 	    lastdiff=High[1]-Low[1];
 	    if(diff<lastdiff)
-        {
-			diff=lastdiff;
-		}
-		FileAppend("c:\\b.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"涨"+"diff:"+Text(diff));
-		PlotNumeric("同方向最大震幅：", diff);
-		return;
+	    {
+		diff=lastdiff;
+	    }
+	    FileAppend("c:\\b.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"涨"+"diff:"+Text(diff));
+	    PlotNumeric("同方向最大震幅：", diff);
+	    return;
 	}
 	if(Close<Open and Close[1]<Open[1])
-    {
+	{
 	    lastdiff=High[1]-Low[1];
 	    if(diff<lastdiff)
-        {
-			diff=lastdiff;
-		}
-		FileAppend("c:\\b.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"跌跌跌跌"+"diff:"+Text(diff));
-		PlotNumeric("同方向最大震幅：", diff);
-		return;
+            {
+		diff=lastdiff;
+	    }
+	    FileAppend("c:\\b.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"跌跌跌跌"+"diff:"+Text(diff));
+ 	    PlotNumeric("同方向最大震幅：", diff);
+	    return;
 	}
 	FileAppend("c:\\b.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"切换"+"diff:"+Text(diff));
 	PlotNumeric("同方向最大震幅：", diff);

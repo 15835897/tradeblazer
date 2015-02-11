@@ -1,0 +1,125 @@
+//------------------------------------------------------------------------
+// 简称: min5
+// 名称: min5
+// 类别: 公式应用
+// 类型: 用户应用
+// 输出:
+//------------------------------------------------------------------------
+
+Vars
+    NumericSeries DayMAValue;
+    StringSeries strKey;
+    String Amplitude;
+    String LastDayMa;
+
+    NumericSeries iAmplitude;
+    NumericSeries iLastDayMa; 
+	
+	Bool status(True); 
+	Numeric todayma(0);
+	Numeric avg1(0);
+
+Begin 
+
+	FileAppend("c:\\EE.log",Text(CurrentBar));
+    If(Date!=Date[1])
+    {
+        strKey = DateToString(Date[1]);
+		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"strKey:"+strKey);
+    }Else
+    {
+        strKey = strKey[1];
+		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"strKey1:"+strKey);
+    }
+
+    Amplitude = GetTBProfileString("Amplitude",strKey);
+    If(Amplitude != InvalidString)
+    {
+        iAmplitude = Value(Amplitude);
+		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"Amplitude:"+Text(iAmplitude));
+
+    }Else
+    {
+        iAmplitude = iAmplitude[1];
+		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"Amplitude:"+Text(iAmplitude));
+    } 
+	
+    LastDayMa = GetTBProfileString("Ma",strKey);
+    If(LastDayMa != InvalidString)
+    {
+        iLastDayMa = Value(LastDayMa);
+		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"LastDayMa:"+Text(iLastDayMa));
+
+    }Else
+    {
+        iLastDayMa = iLastDayMa[1];
+		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"LastDayMa1:"+Text(iLastDayMa));
+    }	
+	
+	
+	todayma=AverageFC(Close,16);
+	FileAppend("c:\\EE.log","todayma:"+Text(todayma));
+	FileAppend("c:\\EE.log","Time:"+Text(Time));
+//	avg1=Average ( HighD[1] - LowD[1] , 20);
+	FileAppend("c:\\EE.log","MarketPosition:"+Text(MarketPosition));
+	
+		FileAppend("c:\\EE.log","CurrentContracts:"+Text(CurrentContracts));
+
+
+	If(Time>0.0910 and MarketPosition ==0 ) 
+	{	
+		If(status)
+		{
+			status=False;
+			FileAppend("c:\\EE.log","HighD:"+Text(HighD(0)));
+			FileAppend("c:\\EE.log","LowD:"+Text(LowD(0)));
+			FileAppend("c:\\EE.log","Close1:"+Text(Close[1]));
+			FileAppend("c:\\EE.log","Close:"+Text(Close));
+			
+			If((HighD(0)-LowD(0)<iAmplitude)) 
+			{
+				If( todayma>iLastDayMa And Close[1]>todayma And Close>todayma)
+				{
+					FileAppend("c:\\EE.log","buy!!!!!!");
+
+					Buy(1,AvgEntryPrice);
+				}
+				Else If( todayma<iLastDayMa And Close[1]<todayma And Close<todayma)
+				{
+					FileAppend("c:\\EE.log","sell!!!!!!");
+
+					Sell(1,AvgEntryPrice);
+				}
+			}
+		}
+		Else If(Close-(HighD(0)-LowD(0))>100){
+			FileAppend("c:\\EE.log","High:"+Text(HighD(0)));
+			FileAppend("c:\\EE.log","Close:"+Text(Close));
+			FileAppend("c:\\EE.log","Low:"+Text(LowD(D)));
+	
+			If((HighD(0)-Close)>(Close-LowD(0)))
+			{
+				FileAppend("c:\\EE.log","buy!!!!!!");
+				Buy(1,AvgEntryPrice);
+			}
+			Else
+			{
+				FileAppend("c:\\EE.log","sell!!!!!!");
+
+				Sell(1,AvgEntryPrice);
+			}	
+		}
+	}
+	FileAppend("c:\\EE.log","xxxxxxxxx");
+	
+   // PlotNumeric("DayMA",DayMAValue);
+End
+
+
+//------------------------------------------------------------------------
+// 编译版本	GS2010.12.08
+// 用户版本	2015-02-11 07:54:44
+// 版权所有	q51394712
+// 更改声明	TradeBlazer Software保留对TradeBlazer平台
+//			每一版本的TrabeBlazer公式修改和重写的权利
+//------------------------------------------------------------------------
