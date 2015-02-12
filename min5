@@ -15,9 +15,16 @@ Vars
     NumericSeries iAmplitude;
     NumericSeries iLastDayMa; 
 	
-	Bool status(True); 
 	Numeric todayma(0);
 	Numeric avg1(0);
+	Numeric MyEntryPrice;       // 开仓价格，本例是开仓均价，也可根据需要设置为某次入场的价格
+	Numeric MyExitPrice;        // 平仓价格
+	Numeric StopLossSet(50);    // 止损设置
+	
+	//Integer openstate(0);
+	//Integer openstate(0);
+	Numeric openstate(0);
+	Numeric MyWin(0);
 
 Begin 
 
@@ -33,6 +40,7 @@ Begin
     }
 
     Amplitude = GetTBProfileString("Amplitude",strKey);
+	//上一天的20日平均震幅
     If(Amplitude != InvalidString)
     {
         iAmplitude = Value(Amplitude);
@@ -44,7 +52,8 @@ Begin
 		FileAppend("c:\\EE.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"Amplitude:"+Text(iAmplitude));
     } 
 	
-    LastDayMa = GetTBProfileString("Ma",strKey);
+    LastDayMa = GetTBProfileString("Ma",strKey);		
+	//上一天16日收盘均值
     If(LastDayMa != InvalidString)
     {
         iLastDayMa = Value(LastDayMa);
@@ -63,54 +72,115 @@ Begin
 //	avg1=Average ( HighD[1] - LowD[1] , 20);
 	FileAppend("c:\\EE.log","MarketPosition:"+Text(MarketPosition));
 	
-		FileAppend("c:\\EE.log","CurrentContracts:"+Text(CurrentContracts));
-
+	FileAppend("c:\\EE.log","CurrentContracts:"+Text(CurrentContracts));
+ 
 
 	If(Time>0.0910 and MarketPosition ==0 ) 
 	{	
-		If(status)
+		FileAppend("c:\\EE.log","HighD:"+Text(HighD(0)));
+		FileAppend("c:\\EE.log","LowD:"+Text(LowD(0)));
+		FileAppend("c:\\EE.log","iAmplitude:"+Text(iAmplitude));
+		
+		FileAppend("c:\\EE.log","Close1:"+Text(Close[1]));
+		FileAppend("c:\\EE.log","Close:"+Text(Close));
+
+		If((HighD(0)-LowD(0)<iAmplitude)) 
 		{
-			status=False;
-			FileAppend("c:\\EE.log","HighD:"+Text(HighD(0)));
-			FileAppend("c:\\EE.log","LowD:"+Text(LowD(0)));
-			FileAppend("c:\\EE.log","Close1:"+Text(Close[1]));
-			FileAppend("c:\\EE.log","Close:"+Text(Close));
 			
-			If((HighD(0)-LowD(0)<iAmplitude)) 
+			If( todayma>iLastDayMa And Close[1]>todayma And Close>todayma)
 			{
-				If( todayma>iLastDayMa And Close[1]>todayma And Close>todayma)
-				{
-					FileAppend("c:\\EE.log","buy!!!!!!");
-
-					Buy(1,AvgEntryPrice);
-				}
-				Else If( todayma<iLastDayMa And Close[1]<todayma And Close<todayma)
-				{
-					FileAppend("c:\\EE.log","sell!!!!!!");
-
-					Sell(1,AvgEntryPrice);
-				}
+				FileAppend("c:\\EE.log","111 buy!!!!!!");
+				SetGlobalVar(0,1);//0：开仓方式
+				Buy(1,0);
+			}
+			Else If( todayma<iLastDayMa And Close[1]<todayma And Close<todayma)
+			{
+				FileAppend("c:\\EE.log","111 sell!!!!!!");
+				SetGlobalVar(0,1);//0：开仓方式
+				SellShort(1,0);
 			}
 		}
 		Else If(Close-(HighD(0)-LowD(0))>100){
+		
 			FileAppend("c:\\EE.log","High:"+Text(HighD(0)));
 			FileAppend("c:\\EE.log","Close:"+Text(Close));
 			FileAppend("c:\\EE.log","Low:"+Text(LowD(D)));
 	
 			If((HighD(0)-Close)>(Close-LowD(0)))
 			{
-				FileAppend("c:\\EE.log","buy!!!!!!");
-				Buy(1,AvgEntryPrice);
-			}
+				SetGlobalVar(0,2);//0：开仓方式
+				FileAppend("c:\\EE.log","222 buy!!!!!!");
+				Buy(1,0);
+			} 
 			Else
 			{
-				FileAppend("c:\\EE.log","sell!!!!!!");
+				SetGlobalVar(0,2);//0：开仓方式
+				FileAppend("c:\\EE.log","222 sell!!!!!!");
 
-				Sell(1,AvgEntryPrice);
+				SellShort(1,0);
 			}	
 		}
 	}
-	FileAppend("c:\\EE.log","xxxxxxxxx");
+	   
+	MyEntryPrice = AvgEntryPrice;
+	openstate = GetGlobalVar(0); 
+	FileAppend("c:\\EE.log","openstate:"+Text(openstate));
+
+	If(MarketPosition==1)
+	{
+		If(openstate==2)
+		{
+			If(Close>MyEntryPrice+50 )  //止赢
+			{
+				 Sell(1,0);
+			}
+		}
+		Else If(openstate==1)
+		{
+			If(Close>CloseD(1))//zhang
+			{
+				MyWin=iAmplitude-Low;
+			}
+			Else  //die
+			{
+				MyWin=High-iAmplitude;
+			}
+			
+			If( MyWin+MyEntryPrice > Close)
+			{
+				Sell(1,0);
+			}
+		}
+	}
+	ELSE If(MarketPosition==-1)
+	{
+	
+		If(openstate==2)
+		{
+			If(Close<MyEntryPrice-50)   //止赢
+			{
+				 BuyToCover(1,0);
+			}
+		} 
+		Else If(openstate==1)
+		{
+			If(Close>CloseD(1))//zhang
+			{
+				MyExitPrice=iAmplitude-Low;
+			}
+			Else  //die
+			{
+				MyExitPrice=High-iAmplitude;
+			}
+			
+			If( Close < MyEntryPrice-MyWin )
+			{
+				 BuyToCover(1,0);
+			}
+		}
+	}
+	
+	FileAppend("c:\\EE.log","xxxxxxxxxXXXXXXXXXXXXXXXXX");
 	
    // PlotNumeric("DayMA",DayMAValue);
 End
