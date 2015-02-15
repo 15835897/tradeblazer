@@ -1,0 +1,77 @@
+//------------------------------------------------------------------------
+// 简称: dirAmp
+// 名称: dirAmp
+// 类别: 公式应用
+// 类型: 用户应用
+// 输出:
+//------------------------------------------------------------------------
+Params 
+    Numeric TMP(0);
+     
+Vars  
+    Numeric diff(0);
+    Numeric lastdiff(0);
+    
+    Numeric iclose(0);
+    Numeric i(0);
+    NumericSeries amp(0);
+    StringSeries strKey;
+    NumericSeries iAmplitude;
+    String avgAmplitude;
+Begin
+      
+    While(Close[i]>Close[i+1] )
+    {
+        i=i+1;
+    }
+    
+    if(i>0)
+    {
+        amp=(High[0]-Low[i]);
+    }
+    Else
+    {
+        While(Close[i]<Close[i+1] )
+        {
+            i=i+1;
+        }
+        amp=(High[i]-Low[0]);
+    }
+    /*
+    If(Date!=Date[1]) 
+    {
+        strKey = DateToString(Date[1]);
+    }Else  
+    {
+        strKey = strKey[1];
+    }*/
+    
+    strKey = DateToString(Date[0]);
+
+    avgAmplitude = GetTBProfileString("Amplitude",strKey);
+    //上一天的20日平均震幅
+    If(avgAmplitude != InvalidString)
+    {
+        iAmplitude = Value(avgAmplitude);
+    }Else
+    {
+        iAmplitude = iAmplitude[1]; 
+    } 
+    if(amp>iAmplitude)
+    {
+        FileAppend("c:\\qq.log",Text(Year)+" ,"+Text(Month)+" ,"+Text(Day)+","+Text(Time)+"  amp:"+Text(amp) + " avg amp:"+Text(iAmplitude));
+    }
+    
+
+    PlotNumeric("同方向累加震幅：", amp);
+
+End
+//同方向最大震幅
+
+//------------------------------------------------------------------------
+// 编译版本 GS2010.12.08
+// 用户版本 2015-02-15 09:44:51
+// 版权所有 q51394712
+// 更改声明 TradeBlazer Software保留对TradeBlazer平台
+//          每一版本的TrabeBlazer公式修改和重写的权利
+//------------------------------------------------------------------------
