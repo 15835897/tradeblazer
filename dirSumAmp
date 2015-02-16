@@ -20,33 +20,37 @@ Vars
     String avgAmplitude;
 Begin
       
-    While(Close[i]>Close[i+1] )
-    {
-        i=i+1;
-    }
+
     
-    if(i>0)
-    {
-        amp=(High[0]-Low[i]);
-    }
-    Else
-    {
-        While(Close[i]<Close[i+1] )
-        {
-            i=i+1;
-        }
-        amp=(High[i]-Low[0]);
-    }
-    /*
-    If(Date!=Date[1]) 
+    If(Date!=Date[1])  
     {
         strKey = DateToString(Date[1]);
+        amp=High-Low;
     }Else  
     {
         strKey = strKey[1];
-    }*/
+        
+        While(Close[i]>Close[i+1] )
+        {
+            i=i+1;
+        }
+        
+        if(i>0)
+        {
+            amp=(High[0]-Low[i]);
+        }
+        Else
+        {
+            While(Close[i]<Close[i+1] )
+            { 
+                i=i+1;
+            }
+            amp=(High[i]-Low[0]);
+        }
+
+    }
     
-    strKey = DateToString(Date[0]);
+    //strKey = DateToString(Date[0]);
 
     avgAmplitude = GetTBProfileString("Amplitude",strKey);
     //上一天的20日平均震幅
@@ -60,10 +64,11 @@ Begin
     if(amp>iAmplitude)
     {
         FileAppend("c:\\qq.log",Text(Year)+" ,"+Text(Month)+" ,"+Text(Day)+","+Text(Time)+"  amp:"+Text(amp) + " avg amp:"+Text(iAmplitude));
-    }
-    
+    } 
+    FileAppend("c:\\1.log",Text(Year)+" ,"+Text(Month)+" ,"+Text(Day)+","+Text(Time)+"  amp:"+Text(amp) + " avg amp:"+Text(iAmplitude));
 
-    PlotNumeric("同方向累加震幅：", amp);
+
+    PlotNumeric("同方向最大震幅：", amp);
 
 End
 //同方向最大震幅
