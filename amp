@@ -1,0 +1,97 @@
+//------------------------------------------------------------------------
+// 简称: amp
+// 名称: amp
+// 类别: 公式应用
+// 类型: 用户应用 
+// 输出:
+//------------------------------------------------------------------------
+Params
+    Numeric Length1(10); 
+Vars  
+    NumericSeries amp(0);
+    NumericSeries ma(0);
+    Numeric highbar(0);
+    Numeric lowbar(99999); 
+    StringSeries strKey;
+    Numeric i(0);
+    
+    NumericSeries iAmplitude;
+    String avgAmplitude;    
+    
+
+Begin
+    ma=Average(Close,Length1);
+    
+    If(Date!=Date[1] or CurrentBar==0)  
+    {
+        strKey = DateToString(Date[1]);
+        amp=High-Low;
+    }
+    Else  
+    {
+        strKey = strKey[1];
+        While(ma[i]>ma[i+1] and Date[i]==Date[i+1] ) 
+        {
+            i=i+1;
+            if(Low[i]<lowbar)
+            {
+                lowbar=Low[i];
+            } 
+            if(High[i]>highbar)
+            {
+                highbar=High[i];
+            }
+        }
+        
+        if(i>0)
+        {
+            amp=highbar-lowbar;
+        }
+        Else
+        {
+            while(ma[i]<=ma[i+1] and Date[i]==Date[i+1] )
+            { 
+                i=i+1;
+                if(Low[i]<lowbar)
+                {
+                    lowbar=Low[i];
+                }
+                if(High[i]>highbar)
+                {
+                    highbar=High[i];
+                }
+            }
+            amp=highbar-lowbar;
+            
+        }
+    }
+    
+    avgAmplitude = GetTBProfileString("Amplitude",strKey);
+    //上一天的20日平均震幅
+    If(avgAmplitude != InvalidString)
+    {
+        iAmplitude = Value(avgAmplitude);
+    }Else
+    {
+        iAmplitude = iAmplitude[1]; 
+    } 
+    If(amp>iAmplitude*0.8)
+    {
+        FileAppend("c:\\b.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"震幅超过20日平均震幅点数:"+Text(amp-iAmplitude*0.6));
+    }
+    Else{
+        FileAppend("c:\\b.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"震幅*未*超过20日平均震幅点数:"+Text(amp-iAmplitude*0.6));
+    }
+    
+    
+    PlotNumeric("超过20日平均震幅：", amp);
+
+End
+
+//------------------------------------------------------------------------
+// 编译版本 GS2010.12.08
+// 用户版本 2015-02-20 21:48:32
+// 版权所有 q51394712
+// 更改声明 TradeBlazer Software保留对TradeBlazer平台
+//          每一版本的TrabeBlazer公式修改和重写的权利
+//------------------------------------------------------------------------
