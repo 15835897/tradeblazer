@@ -1,0 +1,174 @@
+/rams
+    Numeric Length1(3); 
+    
+    
+Vars  
+    NumericSeries amp(0);
+    NumericSeries ma(0);
+    Numeric highbar(0);
+    Numeric lowbar(99999); 
+    StringSeries strKey;
+    Numeric i(0); 
+    
+    NumericSeries iAmplitude;
+    String avgAmplitude;    
+      
+Begin 
+ //   ma=Average(Close,Length1);
+    /*
+    If(Date!=Date[1] or CurrentBar==0)  
+    {
+        strKey = DateToString(Date[1]);
+        amp=High-Low;
+    }
+    Else{
+        amp=HighD[0]-LowD[0];
+    }
+    */
+
+    
+    
+    
+    //FileAppend("c:\\11b.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"fffffffffffffff:"+Text(HighD(0)));
+    //FileAppend("c:\\11b.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"xxxxxxxxxxxxxxxxxxxxxx:"+Text(LowD(0)));
+
+    
+        // SetGlobalVar(1,1);
+        // 3:High
+        // 4: Low
+    
+    If(Date!=Date[1])
+    {
+        strKey = DateToString(Date[1]);
+        SetGlobalVar(3,0);
+        SetGlobalVar(4,999999);
+
+        SetGlobalVar(1,0);
+    }Else
+    {
+        strKey = strKey[1];
+    }
+
+    
+    amp=HighD(0)-LowD(0); 
+    /*
+    //ֻ×ÈÅ£¬±£Á
+    If(Time>0.09 and time<0.16)
+    {
+        If(High>GetGlobalVar(3))
+        {
+            //highbar=High;
+            SetGlobalVar(3,High);
+        }
+        If(Low<GetGlobalVar(4))
+        {
+            SetGlobalVar(4,Low);
+            //lowbar=Low;
+        }
+        //FileAppend("c:\\h.log",Text(date)+"123123123..."+Text(GetGlobalVar(3)));
+        //FileAppend("c:\\h.log",Text(date)+"12312313123..."+Text(GetGlobalVar(4)));
+        //FileAppend("c:\\h.log",Text(date)+"low..."+Text(Low));
+
+        amp=GetGlobalVar(3)-GetGlobalVar(4);
+    }
+    */
+    
+    avgAmplitude = GetTBProfileString("Amplitude",strKey);
+    //ÉһÌµÄ0Èƽ¾ù
+    If(avgAmplitude != InvalidString)
+    {
+        iAmplitude = Value(avgAmplitude);
+    }Else
+    {
+        iAmplitude = iAmplitude[1]; 
+    } 
+      
+    If(amp>iAmplitude)
+    {
+        If(GetGlobalVar(1)==0)
+        {
+            FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"Õ·ù20Èƽ¾ùµã:"+Text(amp-iAmplitude));
+            SetGlobalVar(1,1);
+            SetGlobalVar(2,amp);
+        }
+        Else If(GetGlobalVar(1)==1)
+        {
+            If(GetGlobalVar(2)<amp)
+            {
+                FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"Õ·ù¼Ìø:"+Text(amp-iAmplitude));
+                //SetGlobalVar(1,2);
+                SetGlobalVar(2,amp);
+            }
+            /*
+            else if(CloseD(0)>OpenD(0))  //Õ·ùÕ·½Ï
+            {
+                FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"Õ·ù¼Ìø:"+Text(amp-iAmplitude));
+            }
+            else If(CloseD(0)<OpenD(0))   //Õ·ùµø
+            {
+            
+            }
+            */
+        }
+    }
+    PlotNumeric("Õ·ù", amp);
+    PlotNumeric("È¾ù£º", iAmplitude);
+End
+
+//------------------------------------------------------------------------
+// ±à°汾 GS2010.12.08
+// Ó»§°汾 2015-02-20 21:48:32
+// °æËÓ q51394712
+// ¸ü÷adeBlazer Software±£Á¶ÔradeBlazerƽ̨
+//          ÿһ°汾µÄrabeBlazer¹«ʽÐ¸ĺÍØ´µÄ¨À
+//------------------------------------------------------------------------/------------------------------------------------------------------------
+// 简称: dirAmp
+// 名称: dirAmp
+// 类别: 公式应用
+// 类型: 用户应用
+// 输出:
+//------------------------------------------------------------------------
+Params 
+    Numeric TMP(0);
+     
+Vars  
+    Numeric diff(0);
+    Numeric lastdiff(0);
+    
+    Numeric iclose(0);
+    Numeric i(0);
+    NumericSeries amp(0);
+    StringSeries strKey;
+    NumericSeries iAmplitude;
+    String avgAmplitude;
+Begin
+      
+    While(Close[i]>Close[i+1] )
+    {
+        i=i+1;
+    }
+    
+    if(i>0)
+    {
+        amp=(High[0]-Low[i]);
+    }
+    Else
+    {
+        While(Close[i]<Close[i+1] )
+        {
+            i=i+1;
+        }
+        amp=(High[i]-Low[0]);
+    }
+    /*
+    If(Date!=Date[1]) 
+    {
+        strKey = DateToString(Date[1]);
+    }Else  
+    {
+        strKey = strKey[1];
+    }*/
+    
+    strKey = DateToString(Date[0]);
+
+
