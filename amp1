@@ -1,19 +1,9 @@
-//------------------------------------------------------------------------
-// ?ò amp
-// ?3? amp
-// à±e???ó
-// àD: ó?§?ó 
-// ê3?/------------------------------------------------------------------------
 Params
-    //Numeric Length1(3); 
-    
-    
-    Numeric win(1.5);
-    Numeric lose(0.4);
+    Numeric win(1.6);
+    Numeric lose(0.5);
     Numeric stoptime(0.14);
     Numeric coffee(0.7);
-
-Vars  
+Vars
     NumericSeries amp(0); 
     NumericSeries ma(0);
     Numeric highbar(0);
@@ -21,84 +11,31 @@ Vars
     StringSeries strKey;
     Numeric i(0); 
     Numeric isup(0); 
-
     NumericSeries iAmplitude;
     String avgAmplitude;    
-      
 Begin 
- //   ma=Average(Close,Length1);
-    /*
-    If(Date!=Date[1] or CurrentBar==0)  
-    {
-        strKey = DateToString(Date[1]);
-        amp=High-Low;
-    }
-    Else{
-        amp=HighD[0]-LowD[0];
-    }
-    */
-
-    //FileAppend("c:\\11b.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"fffffffffffffff:"+Text(HighD(0)));
-
-
-        // SetGlobalVar(1,1);
-        // 1: 继续创新高吗
-        // 2:新高状态切换
-        // 3:High
-        // 4: Low
-        
-        // 5 :今天是否已经有过平仓交易
+    // SetGlobalVar(1,1);
+    // 1: 继续创新高吗
+    // 2: 新高状态切换
+    // 3: High
+    // 4: Low
+    // 5 :今天是否已经有过平仓交易
       
-        // SetGlobalVar(1,1);
-        // 1: ?ì???e// 2:D??′????
-        // 3:High
-        // 4: Low
-        
-        // 5 :????-ó1y?ò
-    
     If(Date!=Date[1])
     {
         strKey = DateToString(Date[1]);
         SetGlobalVar(3,0);
         SetGlobalVar(4,999999);
-
         SetGlobalVar(1,0);
         SetGlobalVar(5,0);
-
     }Else
     {
         strKey = strKey[1];
     }
-
     amp=HighD(0)-LowD(0); 
     isup=CloseD(0) - OpenD(0);
-    //isup=-111;
-    FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"LowD111111111:"+Text(isup));
 
-    /*
-    //?×è?￡?±￡á
-    If(Time>0.09 and time<0.16)
-    {
-        If(High>GetGlobalVar(3))
-        {
-            //highbar=High;
-            SetGlobalVar(3,High);
-        }
-        If(Low<GetGlobalVar(4))
-        {
-            SetGlobalVar(4,Low);
-            //lowbar=Low;
-        }
-        //FileAppend("c:\\h.log",Text(date)+"123123123..."+Text(GetGlobalVar(3)));
-        //FileAppend("c:\\h.log",Text(date)+"12312313123..."+Text(GetGlobalVar(4)));
-        //FileAppend("c:\\h.log",Text(date)+"low..."+Text(Low));
-
-        amp=GetGlobalVar(3)-GetGlobalVar(4);
-    }
-    */
-    
     avgAmplitude = GetTBProfileString("Amplitude",strKey);
-    //é?ìμ?0è??ù
     If(avgAmplitude != InvalidString)
     {
         iAmplitude = Value(avgAmplitude);
@@ -106,116 +43,55 @@ Begin
     {
         iAmplitude = iAmplitude[1]; 
     } 
-    FileAppend("c:\\h.log",Text(date)+"12312313123..."+Text(iAmplitude));
-        FileAppend("c:\\h.log",Text(date)+"12312313123..."+Text(iAmplitude*coffee));
-        FileAppend("c:\\h.log",Text(date)+"12312313123..."+Text(iAmplitude*0.7));
-        FileAppend("c:\\h.log",Text(date)+"12312313123..."+Text(coffee));
 
     If(amp>iAmplitude*coffee)
     {
         If(GetGlobalVar(1)==0)
         {
-        
             If(Time>0.14)
             {
                 Return;
             }
-            
-            if(isup>0 and GetGlobalVar(5)==0)  //?·ù?·??
+            if(isup>0 and GetGlobalVar(5)==0) 
             {
-              //  FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"CloseD:"+Text(CloseD(0)));
-             //   FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"LowD:"+Text(LowD(0)));
-
                 If(MarketPosition==0 )
                 {
                     Buy(1,0);
-                    //SellShort(1,0);
-                    //SetGlobalVar(5,1);
+                    //FileAppend("c:\\bb.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"win:"+Text(EntryPrice*win/100));
+                    //FileAppend("c:\\bb.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"lose:"+Text(EntryPrice*lose/100));
+
                 }
             }
-            else If(isup<0 and GetGlobalVar(5)==0)  //?·ùμ?
+            else If(isup<0 and GetGlobalVar(5)==0)  
             {
-                /////////////////////////////////////////////?a??è////////////////////////////////////////////
-                        
-              //  FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"CloseD:"+Text(CloseD(0)));
-             //   FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"OpenD:"+Text(LowD(0)));     
                 If(MarketPosition==0)
                 {
-                    //Buy(1,0);
                     SellShort(1,0);
-                    //SetGlobalVar(5,1);
-
-                    //Buy(1,0);
+                    //FileAppend("c:\\bb.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"win:"+Text(EntryPrice*win/100));
+                    //FileAppend("c:\\bb.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"lose:"+Text(EntryPrice*lose/100));
                 }
-                /*else If(MarketPosition==1) // ó?àμ?é
-                {
-                    While(CurrentEntries < 4 && High >= LastPrice + AddSet*MinPoint) // ???                 {
-                        LastPrice = LastPrice + AddSet*MinPoint;
-                        if(Open > LastPrice) LastPrice = Open;
-                        Buy(1,LastPrice);
-                    }
-
-                    While(CurrentEntries > 0 && Low <= firstPrice - SubSet*MinPoint) // ??                  {
-                        firstPrice = firstPrice - SubSet*MinPoint;
-                        if(Open < firstPrice) firstPrice = Open;
-                        Sell(1,firstPrice);
-                    }
-                }
-                */
-            /////////////////////////////////////////////?è?á////////////////////////////////////////////
             }
-          //  FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"?·ù20è??ùμ?:"+Text(amp-iAmplitude));
             SetGlobalVar(1,1);
-          //  SetGlobalVar(2,amp);
         }
-        /*
-        Else If(GetGlobalVar(1)==1)
-        {
-            If(GetGlobalVar(2)<amp)
-            {
-                FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"?·ù?ì?:"+Text(amp-iAmplitude));
-                //SetGlobalVar(1,2);
-                SetGlobalVar(2,amp);
-            }
-            //else if(CloseD(0)>OpenD(0) and GetGlobalVar(5)==0)  //?·ù?·??
-            //else
-        }
-        */
     }
      
-    //FileAppend("c:\\h.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"wefwefw:"+Text(1+win/100));
-
-    
-    If(MarketPosition==1) // ó?àμ?é
+    If(MarketPosition==1) 
     {
         If(Close<EntryPrice*(1-lose/100) or Time>0.1455 or  Close>EntryPrice*(1+win/100))
         {
-            Sell(1,0);
+            Sell(CurrentContracts,0);
             SetGlobalVar(5,1);
         }
     }
-    else if(MarketPosition==-1) // ó????é
+    else if(MarketPosition==-1) 
     {
         If(Close>EntryPrice*(1+lose/100) or Time>0.1455 or Close<EntryPrice*(1-win/100))
         {
-            BuyToCover(1,0);
+            BuyToCover(CurrentContracts,0);
             SetGlobalVar(5,1);
         }
     }
-    
-    
-
-    
     PlotNumeric("amp", amp);
     PlotNumeric("avg amp", iAmplitude);
-    //PlotNumeric("3?￡o", vol);
-
 End
 
-//------------------------------------------------------------------------
-// ±à°汾 GS2010.12.08
-// ó?§°汾 2015-02-20 21:48:32
-// °??ó q51394712
-// ?ü÷adeBlazer Software±￡á??radeBlazer??
-//          ??°汾μ?rabeBlazer1??D??í?′μ?¨à
-//------------------------------------------------------------------------
