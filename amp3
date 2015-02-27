@@ -1,0 +1,220 @@
+
+//逆势交易
+//每亏一次加一次仓
+//不可行~~~
+
+:rams   
+    Numeric win(0.4); //第一次开仓止赢及反向开仓点 win*（1+Amplitude）
+    Numeric win1(0.3); //反向开仓后，止赢点
+    Numeric lose(0.4);
+
+    // Numeric stoptime(0.14);
+    Numeric coffee(0.7);
+    //Numeric winpoint(80);
+    //Numeric losepoint(50);
+Vars  
+    NumericSeries amp(0); 
+    NumericSeries ma(0);
+    Numeric highbar(0);
+    Numeric lowbar(99999); 
+    StringSeries strKey;
+    Numeric i(0); 
+    Numeric isup(0); 
+    NumericSeries iAmplitude;
+    String avgAmplitude;    
+Begin 
+
+    // SetGlobalVar(1,1);
+    // 1: 继续创新高吗
+    // 2: 新高状态切换
+    // 3: High
+    // 4: Low
+    // 5: 1、今天是否已经有过平仓交易   2、是否反向开仓 3、继续加仓
+    
+    If(Date!=Date[1])
+    {
+        strKey = DateToString(Date[1]);
+        SetGlobalVar(3,0);
+        SetGlobalVar(4,999999);
+        SetGlobalVar(1,0);
+        SetGlobalVar(5,0);
+    }Else
+    {
+        strKey = strKey[1];
+    }
+
+    amp=HighD(0)-LowD(0); 
+    isup=CloseD(0) - OpenD(0);
+
+    avgAmplitude = GetTBProfileString("Amplitude",strKey);
+    If(avgAmplitude != InvalidString)
+    {
+        iAmplitude = Value(avgAmplitude);
+    }Else
+    {
+        iAmplitude = iAmplitude[1]; 
+    } 
+
+    If(amp>iAmplitude)
+    {
+        If(GetGlobalVar(1)==0)
+        {
+            If(Time>0.14)
+            {
+                Return;
+            }
+            if(isup>0 and GetGlobalVar(5)==0)  //首次开仓
+            {
+                If(MarketPosition==0 )
+                {
+                    SellShort(1,0);
+                    //Buy(1,0);
+                }
+            }
+            else If(isup<0 and GetGlobalVar(5)==0)   //首次开仓
+            { 
+                If(MarketPosition==0)
+                {
+                   // SellShort(1,0);
+                    Buy(1,0);
+                }
+            }
+            SetGlobalVar(1,1);
+        }
+    }
+ 
+    If(MarketPosition==1) 
+    {
+        //If(Close<EntryPrice*(1-lose/100) or Time>0.1455 or  Close>EntryPrice*(1+win/100))
+        If(/*Close<AvgEntryPrice-50 or*/ Time>0.1455 ) //止损，收盘前平仓
+        {
+            FileAppend("c:\\bb.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"CurrentContracts:"+Text(CurrentContracts  ));
+            Sell(CurrentContracts ,0);
+            SetGlobalVar(5,4);
+        }
+        else If( GetGlobalVar(5)==3 )//and isup>0) //止损
+        {
+            If(amp>iAmplitude+380)
+            {
+                Sell(CurrentContracts ,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        else If( GetGlobalVar(5)==2 )//and isup>0)
+        {
+            If(amp>iAmplitude+300)
+            {
+                Buy(8,0);
+                SetGlobalVar(5,3);
+            }
+            else If(Close>AvgEntryPrice+200*0.7*0.7)
+            {
+                Sell(CurrentContracts ,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        else If( GetGlobalVar(5)==1 )//and isup>0)
+        {
+            If(amp>iAmplitude+200 )
+            {
+                Buy(4,0);
+                SetGlobalVar(5,2); 
+            }
+            else If(Close>AvgEntryPrice+200*0.7)
+            {
+                Sell(CurrentContracts ,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        else If(GetGlobalVar(5)==0 )//and isup>0)
+        {
+            If(amp>iAmplitude+100)
+            {
+                Buy(2,0);
+                SetGlobalVar(5,1);
+            }
+            else  If(Close>AvgEntryPrice+200)
+            {
+                Sell(CurrentContracts ,0);
+                SetGlobalVar(5,4);
+            }
+        //  FileAppend("c:\\bb.log","state 1");
+        }
+        /*
+        else If(Close>AvgEntryPrice+200)//止盈
+        {
+            Sell(CurrentContracts ,0);
+            SetGlobalVar(5,3);
+        }
+        */
+    }
+    else if(MarketPosition==-1) 
+    {
+        If(/*Close>AvgEntryPrice+50 or */Time>0.1455 ) //止损，收盘前平仓
+        {
+            FileAppend("c:\\bb.log",Text(Year)+"年"+Text(Month)+"月"+Text(Day)+"sell CurrentContracts:"+Text(CurrentContracts));
+            BuyToCover(0-CurrentContracts,0);
+            SetGlobalVar(5,3);
+        }
+        else If( GetGlobalVar(5)==3 )//and isup>0) //止损
+        {
+            If(amp>iAmplitude+380)
+            {
+                BuyToCover(CurrentContracts ,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        else If(GetGlobalVar(5)==2 )//and isup<0)
+        {
+            If(amp>iAmplitude+300)
+            {
+                SellShort(8,0);
+                SetGlobalVar(5,3);
+            }
+            else If(Close<AvgEntryPrice-200*0.7*0.7)//止盈
+            {
+                BuyToCover(0-CurrentContracts,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        else If( GetGlobalVar(5)==1 )//and isup<0)
+        {
+        //  FileAppend("c:\\bb.log"," sell state 2");
+            If(amp>iAmplitude+200 )
+            {
+                SellShort(4,0);
+                SetGlobalVar(5,2);
+            }
+            else If(Close<AvgEntryPrice-200*0.7)//止盈
+            {
+                BuyToCover(0-CurrentContracts  ,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        else If( GetGlobalVar(5)==0 )//and isup<0)
+        {
+            //FileAppend("c:\\bb.log"," sell state 1");
+            If(amp>iAmplitude+100)
+            {
+                SellShort(2,0);
+                SetGlobalVar(5,1);
+            }
+            else If(Close<AvgEntryPrice-200)//止盈
+            {
+                BuyToCover(0-CurrentContracts  ,0);
+                SetGlobalVar(5,4);
+            }
+        }
+        /*
+        else If(Close<AvgEntryPrice-200)//止盈
+        {
+            BuyToCover(0-CurrentContracts  ,0);
+            SetGlobalVar(5,3);
+        }*/
+    }
+    
+    PlotNumeric("amp", amp);
+    PlotNumeric("avg amp", iAmplitude);
+
+End
+
