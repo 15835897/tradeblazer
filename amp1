@@ -40,7 +40,15 @@ Begin
 
     //FileAppend("c:\\11b.log",Text(Year)+"."+Text(Month)+"."+Text(Day)+" "+Text(Time)+" "+"fffffffffffffff:"+Text(HighD(0)));
 
-    
+
+        // SetGlobalVar(1,1);
+        // 1: 继续创新高吗
+        // 2:新高状态切换
+        // 3:High
+        // 4: Low
+        
+        // 5 :今天是否已经有过平仓交易
+      
         // SetGlobalVar(1,1);
         // 1: ?ì???e// 2:D??′????
         // 3:High
